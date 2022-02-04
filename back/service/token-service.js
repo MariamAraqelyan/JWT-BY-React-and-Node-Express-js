@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const tokenModel = require('../models/token-model');
+const ApiError = require("../exceptions/api-error");
 
 class TokenService {
 
@@ -22,11 +23,33 @@ class TokenService {
         return token;
     }
 
+    validateAccessToken(token) {
+        try {
+            const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+            return userData;
+        }catch (e) {
+            return null;
+        }
+    }
+
+    validateRefreshToken(token) {
+        try {
+            const userData = jwt.verify(token, process.env.JWT_REFRESH_ACCESS_TOKEN);
+            return userData;
+        }catch (e) {
+            return null;
+        }
+    }
+
     async removeToken(refreshToken) {
         const tokenData = await tokenModel.deleteOne({refreshToken});
         return tokenData;
     }
 
+    async findToken(refreshToken) {
+        const tokenData = await tokenModel.findOne({refreshToken});
+        return tokenData;
+    }
 }
 
 module.exports = new TokenService();
